@@ -1,5 +1,5 @@
 pub mod pacman_update{
-    use std::io::{stdin, stdout, Write};
+    use std::{io::{stdin, stdout, Write}, process::Command};
 
     pub fn update_pacman(){
         println!("WELCOME TO UPDATE PACMAN");
@@ -16,9 +16,38 @@ pub mod pacman_update{
         }
     
         if input.unwrap() == 'y' {
-            //Do Something
+            pacman(true);
         }else {
-            println!("Cancel \n");
+            print!("\x1B[2J\x1B[1;1H");
+            stdout().flush().unwrap();
+
+            println!("Update Cancel \n");
+        }
+    }
+
+    fn pacman(is_async: bool){
+        if is_async {
+            let mut child_process = Command::new("sudo")
+            .args(&["pacman", "-Syu", "--noconfirm"])
+            .spawn()
+            .expect("Failed Update Pacman");
+
+            print!("\x1B[2J\x1B[1;1H");
+            stdout().flush().unwrap();
+
+            child_process.wait().expect("Failed to wait for child process");
+            println!("Pacman UPDATED\n");
+        }else {
+            let update = Command::new("sudo")
+            .args(&["pacman", "-Syu", "--noconfirm"])
+            .output()
+            .expect("Error Update Pacman");
+
+            print!("\x1B[2J\x1B[1;1H");
+            stdout().flush().unwrap();
+
+            println!("{}Pacman UPDATED\n", String::from_utf8_lossy(&update.stdout));
+            println!("");
         }
     }
 }
